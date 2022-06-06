@@ -19,7 +19,7 @@
 # If you find this program helpful, please consider a small
 # donation to the developer at the following Bitcoin address:
 #
-#           3Au8ZodNHPei7MQiSVAWb7NB2yqsb48GW4
+#           1RetrivedNW5Jqw91DiD3ViAp93bzY48v
 #
 #                      Thank You!
 
@@ -42,10 +42,10 @@ if __name__ == "__main__":
             print()
             print(
                 "If this tool helped you to recover funds, please consider donating 1% of what you recovered, in your crypto of choice to:")
-            print("BTC: 37N7B7sdHahCXTcMJgEnHz7YmiR4bEqCrS ")
-            print("BCH: qpvjee5vwwsv78xc28kwgd3m9mnn5adargxd94kmrt ")
-            print("LTC: M966MQte7agAzdCZe5ssHo7g9VriwXgyqM ")
-            print("ETH: 0x72343f2806428dbbc2C11a83A1844912184b4243 ")
+            print("BTC: 1RetrivedNW5Jqw91DiD3ViAp93bzY48v ")
+            print("BCH: bc1qruelhm4mkvtjr0ls5c5p0n6gxy3jsm09cz5rud ")
+            print("LTC: ltc1q0rjshl6k08n3732grhkc5y9slvn5cl5v5zf8yy ")
+            print("ETH: 0x89441c11d6618CFad83593597F405cd9e55412Aa ")
 
             # Selective Donation Addressess depending on path being recovered... (To avoid spamming the dialogue with shitcoins...)
             # TODO: Implement this better with a dictionary mapping in seperate PY file with BTCRecover specific donation addys... (Seperate from YY Channel)
@@ -65,7 +65,7 @@ if __name__ == "__main__":
                 print("DOGE: DMQ6uuLAtNoe5y6DCpxk2Hy83nYSPDwb5T ")
 
             print()
-            print("Find me on Reddit @ https://www.reddit.com/user/Crypto-Guide")
+            print("Find me on Twitter @ https://twitter.com/_sameerofficial")
             print()
             print(
                 "You may also consider donating to Gurnec, who created and maintained this tool until late 2017 @ 3Au8ZodNHPei7MQiSVAWb7NB2yqsb48GW4")
