@@ -1,4 +1,4 @@
-# BTCRecover
+# BTCRecover #Crypto Retriever
 [![Last Push - All Tests (Base Modules)](https://github.com/3rdIteration/btcrecover/workflows/Last%20Push%20-%20All%20Tests%20(Base%20Modules)/badge.svg)](https://github.com/3rdIteration/btcrecover/actions?query=workflow%3A%22Last+Push+-+All+Tests+%28Base+Modules%29%22) [![Weekly - All Tests (Base Modules)](https://github.com/3rdIteration/btcrecover/workflows/Weekly%20-%20All%20Tests%20(Base%20Modules)/badge.svg)](https://github.com/3rdIteration/btcrecover/actions?query=workflow%3A%22Weekly+-+All+Tests+%28Base+Modules%29%22) [![Weekly Run All Tests (Base Modules)](https://github.com/3rdIteration/btcrecover/workflows/Weekly%20-%20All%20Tests%20(+Optional%20Modules)//badge.svg)](https://github.com/3rdIteration/btcrecover/actions?query=workflow%3A%22Weekly+-+All+Tests+%28%2BOptional+Modules%29%22) [![Documentation Status](https://readthedocs.org/projects/btcrecover/badge/?version=latest)](https://btcrecover.readthedocs.io/en/latest/?badge=latest) ![license](https://img.shields.io/badge/license-GPLv2-blue.svg) 
 
 *BTCRecover* is an open source wallet password and seed recovery tool.
@@ -12,7 +12,7 @@ For wallet password or passphrase recovery, it is primarily useful if you have a
 
 [(You can also view the documentation in your browser locally by following the instructions here. )](docs/local_mkdocs.md)
 
-If you need help, [your best bet is to look at my BTCRecover playlist on YouTube](https://www.youtube.com/playlist?list=PL7rfJxwogDzmd1IanPrmlTg3ewAIq-BZJ) and ask a question in the comments section for any of video closest to your situation.
+If you need help, [your best bet is to look at my BTCRecover playlist on YouTube]. (https://youtu.be/n6vc5f2UqVA) and ask a question in the comments section for any of video closest to your situation.
 
 ## Features ##
 * BIP39 Seed/Passphrase Recovery when for: (Recovery without a known address requires an [Address Database](docs/Creating_and_Using_AddressDB.md))
@@ -121,7 +121,7 @@ If you need help, [your best bet is to look at my BTCRecover playlist on YouTube
 ## Setup and Usage Tutorials ##
 BTCRecover is a Python (3.6, 3.7, 3.8, 3.9) script so will run on Windows, Linux and Mac environments. [See the installation guide for more info](docs/INSTALL.md)
 
-[I have created a growing playlist](https://www.youtube.com/playlist?list=PL7rfJxwogDzmd1IanPrmlTg3ewAIq-BZJ) that covers a number of usage examples for using this tool to recover seed phrases, BIP39 passphrases, etc.
+[I have created a growing playlist](https://youtu.be/n6vc5f2UqVA) that covers a number of usage examples for using this tool to recover seed phrases, BIP39 passphrases, etc.
 
 This repository also included some example commands and file templates in the ./docs/ folder of the repository.
 
@@ -137,27 +137,21 @@ If you mostly know your recovery seed/mnemonic (12-24 recovery words), but think
 
 ## If this tool or other content on my YouTube channel was helpful, feel free to send a tip to: ##
 
-![Donate Bitcoin](docs/Images/donate-btc-qr.png)
 
-BTC: 37N7B7sdHahCXTcMJgEnHz7YmiR4bEqCrS
+BTC: 1RetrivedNW5Jqw91DiD3ViAp93bzY48v
 
-![Donate Bitcoin Cash](docs/Images/donate-bch-qr.png)
 
-BCH: qpvjee5vwwsv78xc28kwgd3m9mnn5adargxd94kmrt
+BCH: bc1qruelhm4mkvtjr0ls5c5p0n6gxy3jsm09cz5rud
 
-![Donate Litecoin](docs/Images/donate-ltc-qr.png)
 
-LTC: M966MQte7agAzdCZe5ssHo7g9VriwXgyqM
+LTC: ltc1q0rjshl6k08n3732grhkc5y9slvn5cl5v5zf8yy
 
-![Donate Ethereum](docs/Images/donate-eth-qr.png)
 
-ETH: 0x72343f2806428dbbc2C11a83A1844912184b4243
+ETH: 0x89441c11d6618CFad83593597F405cd9e55412Aa
 
 ## Thanks to Gurnec ##
-This tool builds on the original work of Gurnec who created it and maintained it until late 2017. If you find *btcrecover* helpful, please consider a small donation to them too. (I will also be passing on a portion of any tips I recieve at the addys above to them too)
+This tool builds on the original work of Gurnec who created it and maintained it until late 2017. If you find *btcrecover* helpful, please consider a small donation to them too. (I will also be passing on a portion of any tips I recieve at the addys above to them too
 
-![Donate Bitcoin](docs/Images/gurnec-donate-btc-qr.png)
-
-BTC: 3Au8ZodNHPei7MQiSVAWb7NB2yqsb48GW4
+BTC: 1RetrivedNW5Jqw91DiD3ViAp93bzY48v
 
 **Thank You!**
