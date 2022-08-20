@@ -127,6 +127,22 @@ _**Note:** Data on Google BigQuery is only updated every 1-2 months, sometimes l
 
 [All LTC Addresses](https://console.cloud.google.com/bigquery?sq=871259226971:13e998b9bf864df8b7c0772f4913b28d)
 
+### Generating Address Lists using Ethereum-ETL
+Confirmed working for: 
+* Binance Smart Chain with Geth Node installed as per: <https://docs.bnbchain.org/docs/validator/fullnode>
+
+For EVM type chains (eg: Binance Smart Chain), another option is to use the Ethereum-ETL tool. This allows you to query a full node (Running Geth or Parity, or a fork of these) and retrieve human readable CSV data representing transations.
+
+Once you have a Geth-Like node running, you can retrieve ETL data with a command like:
+
+``
+ethereumetl export_blocks_and_transactions --start-block STARTBLOCKNUMBER --end-block ENDBLOCKNUMBER --provider-uri http://FULLNODEIP:8545 --blocks-output LOCAL_BLOCKS_CSV_FILE --transactions-output LOCAL_TRANSACTIONS_CSV_FILE
+``
+
+Once you exported the transactions, you can then use the `addrListsFromETLTransactions.py` file in the `utilities` folder within this repository to produce files containing lists of addresses. These address lists can then be used to create an addressDB using the same process covered earlier.
+
+The key thing to understand with this approach is that you will need several TB worth of disk space to store/run and several TB worth of additional space for the full Ethereum ETL output. (So you probably want about 10TB of space...)
+
 ### Checking/Validating AddressDBs
 You can use the check-address-db.py file to test any addresslist file for whether it includes any given addresses.
 

@@ -43,6 +43,19 @@ import lib.bech32 as bech32
 import lib.cardano.cardano_utils as cardano
 import lib.stacks.c32 as c32
 
+# Enable functions that may not work for some standard libraries in some environments
+hashlib_ripemd160_available = False
+
+try:
+    # this will work with micropython and python < 3.10
+    # but will raise and exception if ripemd is not supported (python3.10, openssl 3)
+    hashlib.new('ripemd160')
+    hashlib_ripemd160_available = True
+    def ripemd160(msg):
+        return hashlib.new('ripemd160', msg).digest()
+except:
+    # otherwise use pure python implementation
+    from lib.embit.py_ripemd160 import ripemd160
 
 # Import modules from requirements.txt
 try:
@@ -83,7 +96,6 @@ try:
     bitstring_available = True
 except:
     pass
-
 
 
 _T = TypeVar("_T")
@@ -301,6 +313,8 @@ class WalletBase(object):
     _savevalidseeds = False
 
     def __init__(self, loading = False):
+        if not hashlib_ripemd160_available:
+            print("Warning: Native RIPEMD160 not available via Hashlib, using Pure-Python (This will significantly reduce performance)")
         assert loading, "use load_from_filename or create_from_params to create a " + self.__class__.__name__
 
     @staticmethod
@@ -343,7 +357,7 @@ class WalletBase(object):
         :return: ripemd160(sha256(compressed_pubkey))
         :rtype: str
         """
-        return hashlib.new("ripemd160", hashlib.sha256(compress_pubkey(uncompressed_pubkey)).digest()).digest()
+        return ripemd160(hashlib.sha256(compress_pubkey(uncompressed_pubkey)).digest())
 
     # Simple accessor to be able to identify the BIP44 coin number of the wallet
     def get_path_coin(self):
@@ -616,7 +630,8 @@ class WalletElectrum1(WalletBase):
                     d_pubkey  = coincurve.PublicKey.from_valid_secret(d_privkey).format(compressed=False)
 
                     # Compute the hash160 of the *uncompressed* public key, and check for a match
-                    if hashlib_new("ripemd160", l_sha256(d_pubkey).digest()).digest() in self._known_hash160s:
+
+                    if ripemd160(l_sha256(d_pubkey).digest()) in self._known_hash160s:
                         return mnemonic_ids, count  # found it
 
         return False, count
@@ -1067,7 +1082,7 @@ class WalletBIP32(WalletBase):
                         pubkey_hash160 = self.pubkey_to_hash160(d_pubkey)
                         WITNESS_VERSION = "\x00\x14"
                         witness_program = WITNESS_VERSION.encode() + pubkey_hash160
-                        test_hash160 = hashlib.new("ripemd160", hashlib.sha256(witness_program).digest()).digest()
+                        test_hash160 = ripemd160(hashlib.sha256(witness_program).digest())
 
                     #Basic comparison content for Debugging
                     #for hash160 in self._known_hash160s:
@@ -1270,7 +1285,12 @@ class WalletBIP39(WalletBIP32):
                 second_guess = sorted_hits[-2]
                 # at least 20% must be exclusive to the best_guess language
                 if best_guess[1] - second_guess[1] < 0.2 * len(mnemonic_guess):
-                    raise ValueError("can't guess wordlist language: top best guesses ({}, {}) are too close ({}, {})"
+                    if (best_guess[1] == second_guess[1] and
+                        best_guess[0][:2] == second_guess[0][:2] and
+                        "-firstfour" in best_guess[0]+second_guess[0]):
+                        pass
+                    else:
+                        raise ValueError("can't guess wordlist language: top best guesses ({}, {}) are too close ({}, {})"
                                      .format(best_guess[0], second_guess[0], best_guess[1], second_guess[1]))
             # at least half must be valid words
             if best_guess[1] < 0.5 * len(mnemonic_guess):
@@ -3074,12 +3094,15 @@ def main(argv):
             loaded_wallet = btcrpass.load_wallet(args.wallet)
 
         if args.savevalidseeds:
+            if args.enable_opencl: exit("Error: SaveValidSeeds not a valid option when OpenCL is in use...")
+            print("WARNING: Seeds aren't actually checked when --savevalidseeds argument is used, only generated, checksummed and saved...")
             args.addrs = ['1QLSbWFtVNnTFUq5vxDRoCpvvsSqTTS88P']
             args.addr_limit = 1
             args.no_eta = True
             args.no_dupchecks = True
-            if args.wallet_type.lower() == "ethereum":
-                args.wallet_type = "bip39"
+            if args.wallet_type:
+                if args.wallet_type.lower() == "ethereum":
+                    args.wallet_type = "bip39"
 
         # Look up the --wallet-type arg in the list of selectable_wallet_classes
         if args.wallet_type:
@@ -3555,6 +3578,8 @@ def main(argv):
                 return " ".join(loaded_wallet.id_to_word(i) for i in mnemonic_found), loaded_wallet.get_path_coin()
             elif mnemonic_found is None:
                 return None, loaded_wallet.get_path_coin()  # An error occurred or Ctrl-C was pressed inside btcrpass.main()
+            elif loaded_wallet._savevalidseeds: # Don't give a message that seed isn't found, that isn't relevant in this instance
+                pass
             else:
                 print(" Seed not found" + ( ", sorry..." if phase_num==len(phases) else "" ))
 

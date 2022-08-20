@@ -32,7 +32,7 @@ Just download the latest version from <https://github.com/3rdIteration/btcrecove
 
 ## 2) Install Python ##
 
-**Note:** Only Python 3.6 and later are officially supported... BTCRecover is automatically tested with all supported Python versions (3.6, 3.7, 3.8, 3.9) on all supported environments (Windows, Linux, Mac), so you can be sure that both BTCRecover and all required packages will work correctly. Some features of BTCRecover may work on earlier versions of Python, your best bet is to use run-all-tests.py to see what works and what doesn't...
+**Note:** Only Python 3.7 and later are officially supported... BTCRecover is automatically tested with all supported Python versions (3.7, 3.8, 3.9, 3.10) on all supported environments (Windows, Linux, Mac), so you can be sure that both BTCRecover and all required packages will work correctly. Some features of BTCRecover may work on earlier versions of Python, your best bet is to use run-all-tests.py to see what works and what doesn't...
 
 ### Windows ###
 Video Demo of Installing BTCRecover in Windows: <https://youtu.be/8q65eqpf4gE>
@@ -59,6 +59,17 @@ If any of the "pip3" commands below fail, you may also need to install PIP via t
 If you get a message that there is no installation candidate for Python3-pip, you will need to enable the "universe" repository with the command: `sudo add-apt-repository universe`
 
 You can then re-run the command to install python3-pip from above.
+
+#### Enabling Native RIPEMD160 Support
+As of OpenSSL v3 (Late 2021), ripemd160 is no longer enabled by default and is now part of the "Legacy" set of hash functions. In Linux/MacOS environments, the hashlib module in Python relies on OpenSSL for ripemd160, so if you want full performance in these environments, you may need modify your OpenSSL settings to enable the legacy provider.
+
+As of July 2022, BTCRecover does include a "pure Python" implementation of RIPEMD160, but this only offers about 1/3 of the performance when compared to a native implementation via hashlib.
+
+Video Demo of this applying fix can be found here: <https://youtu.be/S3DWKp0i4i0>
+
+An example of the modified configuration file can be found here: <https://github.com/3rdIteration/btcrecover/blob/master/docs/example_openssl.cnf>
+
+For more information, see the relevant issue on the OpenSSL Github repository: <https://github.com/openssl/openssl/issues/16994>
 
 ### MacOS ###
 

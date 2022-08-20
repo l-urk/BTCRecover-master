@@ -43,6 +43,19 @@ try:
 except:
     pass
 
+hashlib_ripemd160_available = False
+# Enable functions that may not work for some standard libraries in some environments
+try:
+    # this will work with micropython and python < 3.10
+    # but will raise and exception if ripemd is not supported (python3.10, openssl 3)
+    hashlib.new('ripemd160')
+    hashlib_ripemd160_available = True
+    def ripemd160(msg):
+        return hashlib.new('ripemd160', msg).digest()
+except:
+    # otherwise use pure python implementation
+    from lib.embit.py_ripemd160 import ripemd160
+
 # Import modules from requirements.txt
 from Crypto.Cipher import AES
 
@@ -2152,7 +2165,7 @@ class WalletBlockchain(object):
                     # than the correct password
                     unencrypted_block.decode("ascii")
                     if self._savepossiblematches:
-                        with open(self._possible_passwords_file, 'a') as logfile:
+                        with open(self._possible_passwords_file, 'a', encoding="utf_8") as logfile:
                             logfile.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") +
                                           " Possible Password ==>" +
                                           password.decode("utf_8") +
@@ -2166,7 +2179,7 @@ class WalletBlockchain(object):
             if re.search(b"\"guid\"|\"tx_notes\"|\"address_book|\"double", unencrypted_block):
                 if self._savepossiblematches:
                     try:
-                        with open('possible_passwords.log', 'a') as logfile:
+                        with open('possible_passwords.log', 'a', encoding="utf_8") as logfile:
                             logfile.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") +
                                           " Found Password ==>" +
                                           password.decode("utf_8") +
@@ -2176,7 +2189,7 @@ class WalletBlockchain(object):
                             return True # Only return true if we can successfully decode the block in to ascii
 
                     except UnicodeDecodeError: # Likely a false positive if we can't...
-                        with open('possible_passwords.log', 'a') as logfile:
+                        with open('possible_passwords.log', 'a', encoding="utf_8") as logfile:
                             logfile.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") +
                                           " Found Likely False Positive Password (with non-Ascii characters in decrypted block) ==>" +
                                           password.decode("utf_8") +
@@ -3129,6 +3142,8 @@ class WalletMetamask(object):
                 decrypted_vault_json[0]['data']['mnemonic'] = mnemonic
             except TypeError:
                 pass # The conversion will fail if mnemonic is stored as a normal string
+            except KeyError:
+                pass  # The conversion will fail if there are extra items in the wallet and it's a normal string (like with Binance Chain wallet)
 
             #Dump to file
             with open(self._dump_privkeys_file, 'a') as logfile:
@@ -3212,6 +3227,9 @@ class WalletBither(object):
             return False
 
     def __init__(self, loading = False):
+        if not hashlib_ripemd160_available:
+            print("Warning: Native RIPEMD160 not available via Hashlib, using Pure-Python (This will significantly reduce performance)")
+
         assert loading, 'use load_from_* to create a ' + self.__class__.__name__
         # loading crypto libraries is done in load_from_*
 
@@ -3367,7 +3385,7 @@ class WalletBither(object):
             privkey = cutils.int_to_bytes_padded( cutils.bytes_to_int(privkey) % cutils.GROUP_ORDER_INT )
             pubkey  = pubkey_from_secret(privkey).format(self._is_compressed)
             # Compute the hash160 of the public key, and check for a match
-            if hashlib_new("ripemd160", l_sha256(pubkey).digest()).digest() == self._pubkey_hash160:
+            if ripemd160(l_sha256(pubkey).digest()) == self._pubkey_hash160:
                 password = password.decode("utf_16_be", "replace")
                 return password, count
 
@@ -4271,6 +4289,8 @@ class WalletBrainwallet(object):
     def __init__(self, addresses = None, addressdb = None, check_compressed = True, check_uncompressed = True,
                  force_check_p2sh = False, isWarpwallet = False, salt = None, crypto = 'bitcoin', is_performance = False):
         global hmac, coincurve, base58, pylibscrypt
+        if not hashlib_ripemd160_available:
+            print("Warning: Native RIPEMD160 not available via Hashlib, using Pure-Python (This will significantly reduce performance)")
         import lib.pylibscrypt as pylibscrypt
         from lib.cashaddress import base58
         import hmac
@@ -4407,13 +4427,14 @@ class WalletBrainwallet(object):
 
                 pubkey = pubkey_from_secret(privkey).format(compressed = isCompressed)
 
-                pubkey_hash160 = hashlib_new("ripemd160", l_sha256(pubkey).digest()).digest()
+                pubkey_hash160 = ripemd160(l_sha256(pubkey).digest())
 
                 for input_address_p2sh in self.address_type_checks:
                     if (input_address_p2sh):  # Handle P2SH Segwit Address
                         WITNESS_VERSION = "\x00\x14"
                         witness_program = WITNESS_VERSION.encode() + pubkey_hash160
-                        hash160 = hashlib.new("ripemd160", l_sha256(witness_program).digest()).digest()
+
+                        hash160 = ripemd160(l_sha256(witness_program).digest())
                     else:
                         hash160 = pubkey_hash160
 
@@ -4525,7 +4546,7 @@ class WalletBrainwallet(object):
 
             hash160s_standard = []
             for hashed_pubkey in clResult_hashed_pubkey:
-                hash160s_standard.append(hashlib_new("ripemd160", hashed_pubkey).digest())
+                hash160s_standard.append(ripemd160(hashed_pubkey))
 
             hash160s = []
             for pubkey_hash160 in hash160s_standard:
@@ -4533,7 +4554,7 @@ class WalletBrainwallet(object):
                     if (input_address_p2sh):  # Handle P2SH Segwit Address
                         WITNESS_VERSION = "\x00\x14"
                         witness_program = WITNESS_VERSION.encode() + pubkey_hash160
-                        hash160s.append(hashlib.new("ripemd160", l_sha256(witness_program).digest()).digest())
+                        hash160s.append(ripemd160(l_sha256(witness_program).digest()))
                     else:
                         hash160s.append(pubkey_hash160)
 
@@ -4576,6 +4597,9 @@ class WalletRawPrivateKey(object):
     def __init__(self, addresses = None, addressdb = None, check_compressed = True, check_uncompressed = True,
                  force_check_p2sh = False, crypto = 'bitcoin', is_performance = False):
         global hmac, coincurve, base58
+        if not hashlib_ripemd160_available:
+            print("Warning: Native RIPEMD160 not available via Hashlib, using Pure-Python (This will significantly reduce performance)")
+
         from lib.cashaddress import base58
         import hmac
         try:
@@ -4714,13 +4738,13 @@ class WalletRawPrivateKey(object):
                 if self.crypto == 'ethereum':
                     pubkey_hash160 = keccak(pubkey[1:])[-20:]
                 else:
-                    pubkey_hash160 = hashlib_new("ripemd160", l_sha256(pubkey).digest()).digest()
+                    pubkey_hash160 = ripemd160(l_sha256(pubkey).digest())
 
                 for input_address_p2sh in self.address_type_checks:
                     if (input_address_p2sh):  # Handle P2SH Segwit Address
                         WITNESS_VERSION = "\x00\x14"
                         witness_program = WITNESS_VERSION.encode() + pubkey_hash160
-                        hash160 = hashlib.new("ripemd160", l_sha256(witness_program).digest()).digest()
+                        hash160 = ripemd160(l_sha256(witness_program).digest())
                     else:
                         hash160 = pubkey_hash160
 
@@ -6011,12 +6035,12 @@ def parse_arguments(effective_argv, wallet = None, base_iterator = None,
                                           crypto=args.memwallet_coin)
 
     if args.rawprivatekey:
-        loaded_wallet = WalletRawPrivateKey(addresses = args.addresses,
+        loaded_wallet = WalletRawPrivateKey(addresses = args.addrs,
                                           addressdb = args.addressdb,
                                           check_compressed = not(args.skip_compressed),
                                           check_uncompressed = not(args.skip_uncompressed),
                                           force_check_p2sh = args.force_check_p2sh,
-                                          crypto=args.memwallet_coin)
+                                          crypto=args.wallet_type)
 
     # Set the default number of threads to use. For GPU processing, things like hyperthreading are unhelpful, so use physical cores only...
     if not args.threads:
@@ -6768,7 +6792,7 @@ def parse_tokenlist(tokenlist_file, first_line_num = 1):
         tempToken = None
         for token in new_list:
             if token is None: continue
-            if "%[" in token and "]" not in token:
+            if "%" in token[:5] and "[" in token[:5] and "]" not in token:
                 tempToken = token
                 continue
 
