@@ -26,7 +26,7 @@ A rought guide of the blockchain, AddressDB size and optimal parameters as at Ja
 | -------------|:---------------:| ---------------:|------------------:|
 | Bitcoin      | 324 GB          | 16 GB            | 31                |
 | Bitcoin Cash | 155 GB          | 4 GB            | 29                |
-| Litecoin     | 39GB            | 1 GB            | 27                |
+| Litecoin     | 90 GB            | 2 GB            | 28                |
 | Vertcoin     | 5 GB            | 32 MB           | 22                |
 | Monacoin     | 2.5 GB          | 32 MB           | 22                |
 | Ethereum     | N/A (AddressList from BigQuery with ~120 million addresses)           | 4 GB             | 29

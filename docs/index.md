@@ -22,7 +22,7 @@ If you have found a bug, please open an issue on Github here: [https://github.co
     * Bitcoin
     * Bitcoin Cash
     * Cardano (Shelley Era Addresses)
-    * Cosmos (Atom)
+    * Cosmos (Atom) Any many other Cosmos Chains (Nym, GravityBridge, etc)
     * Dash
     * DigiByte
     * Dogecoin

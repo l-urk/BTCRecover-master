@@ -272,6 +272,29 @@ For Android users, you will need to have a rooted phone which will allow you to 
 
 If there are mulitiple wallets there and you are not sure which is the correct one, the name of each wallet can be found in clear text at the end of the file. [See the test wallets included with this repository in ./btcrecover/test/test-wallets](https://github.com/3rdIteration/btcrecover/tree/master/btcrecover/test/test-wallets) for an example)
 
+### Downloading Blockchain.com wallet files ###
+Downloading these kinds of wallet files id done via your browser, through the "Developer Tools" feature.
+
+Basically you need to attempt to log in to your wallet (even with the wrong password) and save the wallet file that is downloaded as part of this process.
+
+Once you are at the blockchain.com wallet login page, with the developer tools open in your browser, you will need to do the following steps:
+
+1) Select the Network tab
+
+2) Enter your Wallet ID, Enter a placeholder password (you can enter anything)
+
+3) Approve the login via email authentication (if applicable)
+
+4) Enter your 2fa code (if applicable) and click Log In (It will say "Wrong Password", but this is normal)
+
+5) Select the "wallet" items
+
+6) Select the "Response" tab 
+
+7) Once you have a response that looks like wallet data, right click on the wallet item, copy it and paste it in to a file using a text editor...
+
+![Download Blockchain Wallet](download_blockchain_com_wallet.png)
+
 ### Downloading Dogechain.info wallet files ###
 Downloading these kinds of wallet files id done via your browser, through the "Developer Tools" feature.
 

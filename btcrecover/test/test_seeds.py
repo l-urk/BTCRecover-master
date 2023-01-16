@@ -897,6 +897,15 @@ class TestRecoveryFromAddress(unittest.TestCase):
                             "doctor giant eternal huge improve suit service poem logic dynamic crane summer exhibit describe later suit dignity ahead unknown fall syrup mirror nurse season")
 
     @skipUnless(can_load_PyCryptoHDWallet, "requires Py_Crypto_HD_Wallet module")
+    def test_WalletPyCryptoHDWallet_Cosmos_NYM(self):
+        self.address_tester(btcrseed.WalletCosmos, "n1g35xm8264cw8gay757ctyqeuqyc0st2muvktx9", 1,
+                            "ocean hidden kidney famous rich season gloom husband spring convince attitude boy")
+    @skipUnless(can_load_PyCryptoHDWallet, "requires Py_Crypto_HD_Wallet module")
+    def test_WalletPyCryptoHDWallet_Cosmos_GravityBridge(self):
+        self.address_tester(btcrseed.WalletCosmos, "gravity1g35xm8264cw8gay757ctyqeuqyc0st2m2cn3ug", 1,
+                            "ocean hidden kidney famous rich season gloom husband spring convince attitude boy")
+
+    @skipUnless(can_load_PyCryptoHDWallet, "requires Py_Crypto_HD_Wallet module")
     def test_WalletPyCryptoHDWallet_SecretNetworkNew(self):
         self.address_tester(btcrseed.WalletSecretNetworkNew, "secret1788gts0a69v5fckayds5cz9n3y4zfmtqct5qxc", 1,
                             "doctor giant eternal huge improve suit service poem logic dynamic crane summer exhibit describe later suit dignity ahead unknown fall syrup mirror nurse season")

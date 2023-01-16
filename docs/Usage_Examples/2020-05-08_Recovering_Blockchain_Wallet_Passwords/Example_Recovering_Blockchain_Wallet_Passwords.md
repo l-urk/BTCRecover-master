@@ -5,7 +5,7 @@
 **Note:** The YouTube video and examples were made before OpenCL acceleration was added to Blockchain.com wallets and can give at least a 10x performance improvement. (See [GPU Accleration](../../GPU_Acceleration.md) for more info) 
 
 ## Overview
-As of 2020, all blockchain.com wallets will require that you first use [this extract script](./../../../extract-scripts/download-blockchain-wallet.py) to download the wallet file.
+[Firstly you download the wallet file as per the process here:](./../../../TUTORIAL/#downloading-blockchaincom-wallet-files)
 
 Once you have that file, there are two ways that blockchain.com wallets can be recovered.
 
@@ -23,14 +23,9 @@ Using a wallet extract requires a few extra steps... [See here for more info abo
 
 ### Download the wallet file...
 
-Navigate to the BTCRecover folder and run:
-**Command**
+[Download the wallet file as per the process here:](./../../../TUTORIAL/#downloading-blockchaincom-wallet-files)
 
-`python  ./extract-scripts/download-blockchain-wallet.py`
-
-You will then be prompted for your walletID, will need to confirm the request via email and enter any required 2fa code. (In the video I use 558751da-d609-486d-88a5-623434a48368, but you won't have access to my email account to confirm that...)
-
-This will then create a file wallet.aes.json (Which can just be left in your BTCRecover folder be used instead of the wallet file in any of the examples below)
+After doing the process above, we will save the wallet data in a file called wallet.aes.json (Which can just be left in your BTCRecover folder be used instead of the wallet file in any of the examples below)
 
 ### Create the TokenList File 
 **Example Tokenlist - tokenListTest.txt**

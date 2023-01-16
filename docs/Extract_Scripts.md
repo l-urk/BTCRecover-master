@@ -91,11 +91,7 @@ Without access to the rest of your wallet file, it is impossible the decrypted p
 
 ## Usage for Blockchain.com ##
 
-The first step is to download your Blockchain.com wallet backup file.
-
-You will need to navigate to the `extract-scripts` folder of this package and run
-
-`python3 download-blockchain-wallet.py`
+[Firstly you download the wallet file as per the documentation here:](./TUTORIAL.md#downloading-blockchaincom-wallet-files)
 
 When prompted, enter your wallet ID and then approve the login request on the email account associated with the wallet. Once the login is approved, your wallet.aes.json file will be saved to you PC.
 

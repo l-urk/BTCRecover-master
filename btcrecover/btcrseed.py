@@ -2310,7 +2310,7 @@ class WalletPolkadotSubstrate(WalletPyCryptoHDWallet):
 
 ############### Cosmos ###############
 
-@register_selectable_wallet_class('Cosmos BIP44')
+@register_selectable_wallet_class('Cosmos BIP44 + Any many other Cosmos Chains (Nym, GravityBridge, etc)')
 class WalletCosmos(WalletPyCryptoHDWallet):
     def _verify_seed(self, mnemonic, passphrase = None):
         if passphrase:
@@ -2332,6 +2332,23 @@ class WalletCosmos(WalletPyCryptoHDWallet):
                    return True
 
         return False
+
+    # Override method for adding addresses, allows easy use of Cosmos Clones (
+    @staticmethod
+    def _addresses_to_hash160s(addresses):
+        hash160s = set()
+
+        #With Py_Crypto_HD_Wallet type wallets we don't worry about converting to hash160
+        # (Minor performancce hit, but not an issue)
+        for address in addresses:
+            hrp, pkey = bech32.bech32_decode(address)
+
+            # Basically just convert all addresses to the equivalent cosmos address
+            cosmos_address = bech32.bech32_encode('cosmos', pkey)
+
+            hash160s.add(cosmos_address)
+
+        return hash160s
 
 ############### Tezos ###############
 
@@ -2405,6 +2422,37 @@ class WalletSecretNetworkNew(WalletPyCryptoHDWallet):
                     return True
 
         return False
+
+# This uses the PyCryptoHDWallet implementation of Cardano Shelly, which is a bit more limited in terms of derivation path
+# and wallet support, but is also several times faster. (ToDo: Implement speed improvement in to other implementation)
+#
+# ############### pyhd-cardano-shelly-ledger ###############
+# @register_selectable_wallet_class('PyCryptoHD-Cardano-Shelly-Ledger')
+# class WalletPyCryptoCardanoShellyLedger(WalletPyCryptoHDWallet):
+#
+#     def _verify_seed(self, mnemonic, passphrase = None):
+#         if passphrase:
+#             testSaltList = [passphrase]
+#         else:
+#             testSaltList = self._derivation_salts
+#
+#         for salt in testSaltList:
+#
+#             wallet = py_crypto_hd_wallet.HdWalletCardanoShelleyFactory(py_crypto_hd_wallet.HdWalletCardanoShelleyCoins.CARDANO_LEDGER)
+#
+#             wallet2 = wallet.CreateFromMnemonic("Tron", mnemonic = " ".join(mnemonic), passphrase = salt.decode())
+#
+#             for account_index in range(self._address_start_index, self._address_start_index + self._addrs_to_generate):
+#                 wallet2.Generate(addr_num=1, addr_off=0, acc_idx=account_index,
+#                                  change_idx=py_crypto_hd_wallet.HdWalletBipChanges.CHAIN_EXT)
+#
+#                 if wallet2.ToDict()['address']['address_0']['address'] in self._known_hash160s:
+#                     return True
+#
+#                 if wallet2.ToDict()['staking_key']['address'] in self._known_hash160s:
+#                     return True
+#
+#         return False
 
 ############### Helium ###############
 
