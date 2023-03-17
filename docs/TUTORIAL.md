@@ -233,13 +233,15 @@ This string is what you will use with the `--yoroi-master-password` argument
 
 ### Finding MultiBit Classic Wallet Files ###
 
-*btcrecover* doesn’t operate directly on MultiBit Classic wallet files, instead it operates on MultiBit private key backup files. When you first add a password to your MultiBit Classic wallet, and after that each time you add a new receiving address or change your wallet password, MultiBit creates an encrypted private key backup file in a `key-backup` directory that's near the wallet file. These private key backup files are much faster to try passwords against (by a factor of over 1,000), which is why *btcrecover* uses them. For the default wallet that is created when MultiBit is first installed, this directory is located here:
+There are two different files that *btcrecover* can be used wth for this type of wallet. While you can run BTCRecover with MultiBit Classic .wallet files, you are far better off using MultiBit private key backup files. These private key backup files are much faster to try passwords against (Faster by a factor of over 1,000) These key backup files are created when you first add a password to your MultiBit Classic wallet, and after that each time you add a new receiving address or change your wallet password. 
+
+These are key backups are created in the`key-backup` directory that's near the wallet file.
+
+For the default wallet that is created when MultiBit is first installed, this directory is located here:
 
     %appdata%\MultiBit\multibit-data\key-backup
 
 The key files have names which look like `walletname-20140407200743.key`. If you've created additional wallets, their `key-backup` directories will be located elsewhere and it's up to you to locate them. Once you have, choose the most recent `.key` file and copy it into the directory containing `btcrecover.py` for it to use.
-
-For more details on locating your MultiBit private key backup files, see: <https://www.multibit.org/en/help/v0.5/help_fileDescriptions.html>
 
 ### Finding Metamask Wallet Files ###
 For Chrome Based Browsers, you will need to locate the data folder for the browser extension. You then use the path to this wallet folder with the --wallet argument.

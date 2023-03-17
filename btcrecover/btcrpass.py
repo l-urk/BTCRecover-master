@@ -124,9 +124,21 @@ except:
 
 searchfailedtext = "\nAll possible passwords (as specified in your tokenlist or passwordlist) have been checked and none are correct for this wallet. You could consider trying again with a different password list or expanded tokenlist..."
 
-# The progressbar module is recommended but optional; it is typically
-# distributed with btcrecover (it is loaded later on demand)
+def load_customTokenWildcard(customTokenWildcardFile):
+    customTokenWildcards = ['']
+    if customTokenWildcardFile:
+        try:
+            customTokenWildcards_File = open(customTokenWildcardFile, "r")
+            customTokenWildcards_Lines = customTokenWildcards_File.readlines()
 
+            for customTokenWildcard in customTokenWildcards_Lines:
+                customTokenWildcards.append(customTokenWildcard.strip())
+            customTokenWildcards_File.close()
+        except Exception as e:
+            print(e)
+    return customTokenWildcards
+
+# Assemble and output some information about the current system and python environment.
 def full_version():
     from struct import calcsize
     return "btcrecover {} on Python {} {}-bit, {}-bit unicodes, {}-bit ints".format(
@@ -155,7 +167,10 @@ def enable_unicode_mode():
 # Recognized wildcard (e.g. %d, %a) types mapped to their associated sets
 # of characters; used in expand_wildcards_generator()
 # warning: these can't be the key for a wildcard set: digits 'i' 'b' '[' ',' ';' '-' '<' '>'
-def init_wildcards():
+def init_wildcards(wildcard_custom_list_e = None,
+                   wildcard_custom_list_f = None,
+                   wildcard_custom_list_j = None,
+                   wildcard_custom_list_k = None):
     global wildcard_sets, wildcard_keys, wildcard_nocase_sets, wildcard_re, \
            custom_wildcard_cache, backreference_maps, backreference_maps_sha1
     # N.B. that tstr() will not convert string.*case to Unicode correctly if the locale has
@@ -181,10 +196,15 @@ def init_wildcards():
         tstr("p") : tstr().join(map(tchr, range(33, 127))),  # all ASCII printable characters except whitespace
         tstr("P") : tstr().join(map(tchr, range(33, 127))) + tstr(" \r\n\t"),  # as above, plus space, newline, and tab
         tstr("q") : tstr().join(map(tchr, range(33, 127))) + tstr(" "),  # all ASCII printable characters plus whitespace (All characters that are easily available for a Trezor Passphrase via keyboard or touchscreen entry)
+        tstr("U"): ''.join(chr(i) for i in range(65536)),  # All possible 16 bit unicode characters
+        tstr("e"): load_customTokenWildcard(wildcard_custom_list_e), # %e and %f are special types of wildcards which can both be customised AND can occur multiple times, but always have the same value. (And can also include other types of wildcards)
+        tstr("f"): load_customTokenWildcard(wildcard_custom_list_f),
+        tstr("j"): load_customTokenWildcard(wildcard_custom_list_j), # %j and %k behave mostly like standard wildcards but can be entire words/strings and are loaded from a custom file
+        tstr("k"): load_customTokenWildcard(wildcard_custom_list_k),
         # wildcards can be used to escape these special symbols
         tstr("%") : tstr("%"),
         tstr("^") : tstr("^"),
-        tstr("S") : tstr("$")  # the key is intentionally a capital "S", the value is a dollar sign
+        tstr("S") : tstr("$"),  # the key is intentionally a capital "S", the value is a dollar sign
     }
     wildcard_keys = tstr().join(wildcard_sets)
     #
@@ -816,7 +836,7 @@ class WalletMultiBit(object):
         load_aes256_library(warnings=False)
         self.__dict__ = state
 
-    # This just dumps the wallet private keys
+    # This just dumps the wallet private keys for Android Wallets
     def dump_privkeys(self, wallet_data):
         with open(self._dump_privkeys_file, 'a') as logfile:
             from . import bitcoinj_pb2
@@ -832,6 +852,17 @@ class WalletMultiBit(object):
             pb_wallet.ParseFromString(pbdata)
             mnemonic = WalletBitcoinj.extract_mnemonic(pb_wallet)
             logfile.write("Android Wallet Mnemonic: '" + mnemonic.decode() + "' derivation path: m/0'")
+
+    # This just dumps the wallet private keys for Multibit Classic, Multidoge Wallets
+    def dump_privkeys_keybackup(self, key1, key2, iv):
+        with open(self._dump_privkeys_file, 'a') as logfile:
+            decrypted_wallet = aes256_cbc_decrypt(key1 + key2, iv, self._encrypted_wallet).decode().splitlines()
+            for line in decrypted_wallet:
+                try:
+                    key, date = line.split(" ")
+                    logfile.write(key + "\n")
+                except:
+                    pass
 
     def passwords_per_seconds(self, seconds):
         return max(int(round(self._passwords_per_second * seconds)), 1)
@@ -908,9 +939,13 @@ class WalletMultiBit(object):
                                     break  # not base58
                             # If the loop above doesn't break, it's base58; we've found it
                             else:
+                                if self._dump_privkeys_file:
+                                    self.dump_privkeys_keybackup(key1, key2, iv)
                                 return orig_passwords[count-1], count
                         else:
                             # (when no second block is available, there's a 1 in 300 billion false positive rate here)
+                            if self._dump_privkeys_file:
+                                self.dump_privkeys_keybackup(key1, key2, iv)
                             return orig_passwords[count - 1], count
                 #
                 # Does it look like a bitcoinj protobuf (newest Bitcoin for Android backup)
@@ -950,6 +985,7 @@ EncryptionParams = collections.namedtuple("EncryptionParams", "salt n r p")
 @register_wallet_class
 class WalletBitcoinj(object):
     opencl_algo = -1
+    _dump_privkeys_file = None
 
     def data_extract_id():
         return "bj"
@@ -1047,7 +1083,14 @@ class WalletBitcoinj(object):
 
         pb_wallet = bitcoinj_pb2.Wallet()
         pb_wallet.ParseFromString(filedata)
+
         if pb_wallet.encryption_type == bitcoinj_pb2.Wallet.UNENCRYPTED:
+            print("\nWallet Not Encrypted, Contains the following Private Keys")
+            for key in pb_wallet.key:
+                from lib.cashaddress import base58
+                privkey_wif = base58.b58encode_check(bytes([0x80]) + key.secret_bytes + bytes([0x1]))
+                print(privkey_wif)
+                print()
             raise ValueError("bitcoinj wallet is not encrypted")
         if pb_wallet.encryption_type != bitcoinj_pb2.Wallet.ENCRYPTED_SCRYPT_AES:
             raise NotImplementedError("Unsupported bitcoinj encryption type "+str(pb_wallet.encryption_type))
@@ -1065,6 +1108,7 @@ class WalletBitcoinj(object):
                     self._scrypt_n    = pb_wallet.encryption_parameters.n
                     self._scrypt_r    = pb_wallet.encryption_parameters.r
                     self._scrypt_p    = pb_wallet.encryption_parameters.p
+                    self.pb_wallet_filedata = filedata
                     return self
                 print("Warning: ignoring encrypted key of unexpected length ("+str(encrypted_len)+")", file=sys.stderr)
 
@@ -1083,6 +1127,19 @@ class WalletBitcoinj(object):
 
     def difficulty_info(self):
         return "scrypt N, r, p = {}, {}, {}".format(self._scrypt_n, self._scrypt_r, self._scrypt_p)
+
+    def dump_privkeys(self, derived_key):
+        from . import bitcoinj_pb2
+        pb_wallet = bitcoinj_pb2.Wallet()
+        pb_wallet.ParseFromString(self.pb_wallet_filedata)
+        
+        from lib.cashaddress import base58
+        with open(self._dump_privkeys_file, 'a') as logfile:
+            for key in pb_wallet.key:
+                privkey = aes256_cbc_decrypt(derived_key, key.encrypted_data.initialisation_vector,
+                                               key.encrypted_data.encrypted_private_key)[:32]
+                privkey_wif = base58.b58encode_check(bytes([0x80]) + privkey + bytes([0x1]))
+                logfile.write(privkey_wif + "\n")
 
     # This is the time-consuming function executed by worker thread(s). It returns a tuple: if a password
     # is correct return it, else return False for item 0; return a count of passwords checked for item 1
@@ -1106,6 +1163,9 @@ class WalletBitcoinj(object):
             # If the last block (bytes 16-31) of part_encrypted_key is all padding, we've found it
             if part_key == b"\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10":
                 password = password.decode("utf_16_be", "replace")
+                if self._dump_privkeys_file:
+                    self.dump_privkeys(derived_key)
+
                 return password, count
 
         return False, count
@@ -1177,7 +1237,6 @@ class WalletCoinomi(WalletBitcoinj):
 
         pb_wallet = coinomi_pb2.Wallet()
         pb_wallet.ParseFromString(filedata)
-        #print(pb_wallet)
         if pb_wallet.encryption_type == coinomi_pb2.Wallet.UNENCRYPTED:
             raise ValueError("Coinomi wallet is not encrypted")
         if pb_wallet.encryption_type != coinomi_pb2.Wallet.ENCRYPTED_SCRYPT_AES:
@@ -5522,6 +5581,10 @@ def parse_arguments(effective_argv, wallet = None, base_iterator = None,
     parser.add_argument("--restore",      metavar="FILE",      help="restore progress and options from an autosave file (must be the only option on the command line)")
     parser.add_argument("--passwordlist", metavar="FILE", nargs="?", const="-", help="instead of using a tokenlist, read complete passwords (exactly one per line) from this file or from stdin")
     parser.add_argument("--has-wildcards",action="store_true", help="parse and expand wildcards inside passwordlists (default: wildcards are only parsed inside tokenlists)")
+    parser.add_argument("--wildcard-custom-list-e",metavar="FILE", help="Path to a custom list file which will be used fr the %%e expanding wildcard")
+    parser.add_argument("--wildcard-custom-list-f",metavar="FILE", help="Path to a custom list file which will be used fr the %%f expanding wildcard")
+    parser.add_argument("--wildcard-custom-list-j",metavar="FILE", help="Path to a custom list file which will be used fr the %%j expanding wildcard")
+    parser.add_argument("--wildcard-custom-list-k",metavar="FILE", help="Path to a custom list file which will be used fr the %%k expanding wildcard")
 
     #
     # Optional bash tab completion support
@@ -5565,6 +5628,14 @@ def parse_arguments(effective_argv, wallet = None, base_iterator = None,
                             help=argparse.SUPPRESS)  # Flag to be able to indicate to generators that we are doing seed generation, not password generation
         parser.add_argument("--mnemonic-length", type=int,
                             help=argparse.SUPPRESS)  # Argument used for generators in seed generation, not password generation
+        parser.add_argument("--wildcard-custom-list-e", metavar="FILE",
+                            help="Path to a custom list file which will be used fr the %%e expanding wildcard")
+        parser.add_argument("--wildcard-custom-list-f", metavar="FILE",
+                            help="Path to a custom list file which will be used fr the %%f expanding wildcard")
+        parser.add_argument("--wildcard-custom-list-j", metavar="FILE",
+                            help="Path to a custom list file which will be used fr the %%j expanding wildcard")
+        parser.add_argument("--wildcard-custom-list-k", metavar="FILE",
+                            help="Path to a custom list file which will be used fr the %%k expanding wildcard")
 
         parser._add_container_actions(parser_common)
         # Add these in as non-options so that args gets a copy of their values
@@ -5725,7 +5796,7 @@ def parse_arguments(effective_argv, wallet = None, base_iterator = None,
 
 
     # Do some basic globals initialization; the rest are all done below
-    init_wildcards()
+    init_wildcards(args.wildcard_custom_list_e, args.wildcard_custom_list_f, args.wildcard_custom_list_j, args.wildcard_custom_list_k)
     init_password_generator()
 
     # Do a bunch of argument sanity checking
@@ -6037,7 +6108,7 @@ def parse_arguments(effective_argv, wallet = None, base_iterator = None,
         if args.wallet_type == "cardano":
             loaded_wallet = WalletCardano(args.addrs, args.addressdb, mnemonic,
                                         args.language, args.bip32_path, args.performance)
-        elif args.wallet_type in ['avalanche', 'tron', 'solana', 'cosmos', 'tezos']:
+        elif args.wallet_type in ['avalanche', 'tron', 'solana', 'cosmos', 'tezos','stellar']:
             loaded_wallet = WalletPyCryptoHDWallet(args.mpk, args.addrs, args.addr_limit, args.addressdb, mnemonic,
                                     args.language, args.bip32_path, args.wallet_type, args.performance)
         elif args.wallet_type in ['polkadotsubstrate']:
@@ -7660,6 +7731,21 @@ def expand_wildcards_generator(password_with_wildcards, prior_prefix = None):
         yield prior_prefix + password_with_wildcards
         return
 
+    # %e and %f are special types of wildcards which can both be customised AND can occur multiple times, but always have the same value
+    if "%e" in password_with_wildcards:
+        for wildcard in wildcard_sets["e"]:
+            loop_password_with_wildcards = password_with_wildcards.replace("%e", wildcard)
+            for password_expanded in expand_wildcards_generator(loop_password_with_wildcards):
+                yield password_expanded
+        return
+
+    if "%f" in password_with_wildcards:
+        for wildcard in wildcard_sets["f"]:
+            loop_password_with_wildcards = password_with_wildcards.replace("%f", wildcard)
+            for password_expanded in expand_wildcards_generator(loop_password_with_wildcards):
+                yield password_expanded
+        return
+
     # Copy a few globals into local for a small speed boost
     l_range = range
     l_len    = len
@@ -7779,7 +7865,6 @@ def expand_wildcards_generator(password_with_wildcards, prior_prefix = None):
 
             # Expand the wildcard into a length of characters according to the wildcard type/caseflag
             for wildcard_expanded_list in itertools.product(wildcard_set, repeat=wildcard_len):
-
                 # If the wildcard was at the end of the string, we're done
                 if password_postfix_with_wildcards == "":
                     yield full_password_prefix + tstr().join(wildcard_expanded_list)

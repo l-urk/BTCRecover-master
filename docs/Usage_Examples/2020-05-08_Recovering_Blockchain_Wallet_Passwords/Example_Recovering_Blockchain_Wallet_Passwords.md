@@ -1,6 +1,6 @@
 # Recovering Blockchain.com Wallets 
 #### _Previously known as blockchain.info_
-[YouTube Video can be found here: https://youtu.be/rkw23s7s4as](https://youtu.be/rkw23s7s4as)
+[YouTube Video can be found here: https://youtu.be/rkw23s7s4as](https://youtu.be/f63FpoTKwSw)
 
 **Note:** The YouTube video and examples were made before OpenCL acceleration was added to Blockchain.com wallets and can give at least a 10x performance improvement. (See [GPU Accleration](../../GPU_Acceleration.md) for more info) 
 

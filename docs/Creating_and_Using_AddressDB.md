@@ -127,6 +127,13 @@ _**Note:** Data on Google BigQuery is only updated every 1-2 months, sometimes l
 
 [All LTC Addresses](https://console.cloud.google.com/bigquery?sq=871259226971:13e998b9bf864df8b7c0772f4913b28d)
 
+### Generating Address Lists from Blockchair Database Dumps
+Blockchair distribute a range of different database dumps, specifically lists of addresses and balance. They can be found here: <https://blockchair.com/dumps#database>
+
+The .tsv.gz files can be directly used to create address databases without decompressing the file via the --inputlist argument.
+
+**Note: These lists of addresses only include addresses that currently have a balance, as opposed to the other methods here which will include all addresses which have ever had a balance. What this means is that if you use this data from blockchair, you may run in to issues with address-generation-limits. (Which are normally not a consideration when using address databases)**
+
 ### Generating Address Lists using Ethereum-ETL
 Confirmed working for: 
 * Binance Smart Chain with Geth Node installed as per: <https://docs.bnbchain.org/docs/validator/fullnode>
