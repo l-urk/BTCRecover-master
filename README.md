@@ -1,4 +1,12 @@
 # BTCRecover #Crypto Retriever
+
+#L_lurk Notes
+You need to install some dependancies to get it to work. It isn't obvious what you need to do so I will include that here:
+pip install pycryptodome
+This worked for me with python 3.17
+Donations at the bottom go to me :)
+
+
 [![Last Push - All Tests (Base Modules)](https://github.com/3rdIteration/btcrecover/workflows/Last%20Push%20-%20All%20Tests%20(Base%20Modules)/badge.svg)](https://github.com/3rdIteration/btcrecover/actions?query=workflow%3A%22Last+Push+-+All+Tests+%28Base+Modules%29%22) [![Weekly - All Tests (Base Modules)](https://github.com/3rdIteration/btcrecover/workflows/Weekly%20-%20All%20Tests%20(Base%20Modules)/badge.svg)](https://github.com/3rdIteration/btcrecover/actions?query=workflow%3A%22Weekly+-+All+Tests+%28Base+Modules%29%22) [![Weekly Run All Tests (Base Modules)](https://github.com/3rdIteration/btcrecover/workflows/Weekly%20-%20All%20Tests%20(+Optional%20Modules)//badge.svg)](https://github.com/3rdIteration/btcrecover/actions?query=workflow%3A%22Weekly+-+All+Tests+%28%2BOptional+Modules%29%22) [![Documentation Status](https://readthedocs.org/projects/btcrecover/badge/?version=latest)](https://btcrecover.readthedocs.io/en/latest/?badge=latest) ![license](https://img.shields.io/badge/license-GPLv2-blue.svg) 
 
 *BTCRecover* is an open source wallet password and seed recovery tool.
@@ -137,21 +145,5 @@ If you mostly know your recovery seed/mnemonic (12-24 recovery words), but think
 
 ## If this tool or other content on my YouTube channel was helpful, feel free to send a tip to: ##
 
-
-BTC: 1RetrivedNW5Jqw91DiD3ViAp93bzY48v
-
-
-BCH: bc1qruelhm4mkvtjr0ls5c5p0n6gxy3jsm09cz5rud
-
-
-LTC: ltc1q0rjshl6k08n3732grhkc5y9slvn5cl5v5zf8yy
-
-
-ETH: 0x89441c11d6618CFad83593597F405cd9e55412Aa
-
-## Thanks to Gurnec ##
-This tool builds on the original work of Gurnec who created it and maintained it until late 2017. If you find *btcrecover* helpful, please consider a small donation to them too. (I will also be passing on a portion of any tips I recieve at the addys above to them too
-
-BTC: 1RetrivedNW5Jqw91DiD3ViAp93bzY48v
-
-**Thank You!**
+BTC: bc1q8sk5nnkf3t8tznrn6vyn9sqd9gzpv876zhp6wl
+LTC: ltc1q9wg0rqetyl09yqyxpdplvjl5kllnucc53337es
