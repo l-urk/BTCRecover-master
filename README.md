@@ -1,6 +1,6 @@
 # BTCRecover #Crypto Retriever
 
-#L_lurk Notes
+# L_lurk Notes
 You need to install some dependancies to get it to work. It isn't obvious what you need to do so I will include that here:
 pip install pycryptodome
 This worked for me with python 3.17
